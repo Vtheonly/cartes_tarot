@@ -1,1 +1,0 @@
-class DocumentException implements Exception {}

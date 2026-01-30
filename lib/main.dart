@@ -550,7 +550,7 @@ class MainMenu extends StatelessWidget {
                   padding: const EdgeInsets.all(16),
                   margin: const EdgeInsets.symmetric(horizontal: 32),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withAlpha(25),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Text(
@@ -579,7 +579,7 @@ class MainMenu extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withAlpha(77),
               blurRadius: 8,
               offset: const Offset(2, 4),
             ),
@@ -717,8 +717,8 @@ class GameBoard extends StatelessWidget {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: isCurrentTurn 
-                  ? Colors.amber.withOpacity(0.2) 
-                  : Colors.white.withOpacity(0.05),
+                  ? Colors.amber.withAlpha(51) 
+                  : Colors.white.withAlpha(13),
               borderRadius: BorderRadius.circular(12),
               border: isCurrentTurn 
                   ? Border.all(color: Colors.amber, width: 2)
@@ -778,7 +778,7 @@ class GameBoard extends StatelessWidget {
         border: Border.all(color: const Color(0xFF8b4513), width: 8),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.5),
+            color: Colors.black.withAlpha(128),
             blurRadius: 16,
             spreadRadius: 2,
           ),
@@ -829,7 +829,7 @@ class GameBoard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.3),
+        color: Colors.black.withAlpha(77),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
@@ -839,7 +839,7 @@ class GameBoard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: isPlayerTurn ? Colors.amber.withOpacity(0.2) : Colors.transparent,
+              color: isPlayerTurn ? Colors.amber.withAlpha(51) : Colors.transparent,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
@@ -947,8 +947,8 @@ class TarotCardWidget extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: isInteractive 
-                ? Colors.amber.withOpacity(0.5) 
-                : Colors.black.withOpacity(0.3),
+                ? Colors.amber.withAlpha(128) 
+                : Colors.black.withAlpha(77),
             blurRadius: isInteractive ? 12 : 6,
             offset: const Offset(2, 4),
           ),

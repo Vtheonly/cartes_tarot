@@ -1,1 +1,0 @@
-class UnhandledException implements Exception {}
