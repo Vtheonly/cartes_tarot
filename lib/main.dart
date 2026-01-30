@@ -6,7 +6,7 @@ void main() {
   runApp(const TarotAfricainApp());
 }
 
-/// Main Application Widget
+
 class TarotAfricainApp extends StatelessWidget {
   const TarotAfricainApp({super.key});
   
@@ -39,25 +39,25 @@ class TarotAfricainApp extends StatelessWidget {
   }
 }
 
-// =============================================================================
-// MODELS
-// =============================================================================
 
-/// Card types in African Tarot - only trumps (atouts) and the Excuse
+
+
+
+
 enum CardType { trump, excuse }
 
-/// Represents a single Tarot card
+
 class TarotCard {
-  final int value; // 1-21 for trumps, 0 for excuse
+  final int value; 
   final CardType type;
   
   TarotCard(this.value, this.type);
   
-  /// Display name for the card
+  
   String get label => type == CardType.excuse ? "Excuse" : "Atout $value";
   
-  /// Gets the effective value for comparison
-  /// Excuse can be 0 (weakest) or 22 (strongest) depending on context
+  
+  
   int getEffectiveValue({bool excuseAsHighest = false}) {
     if (type == CardType.excuse) {
       return excuseAsHighest ? 22 : 0;
@@ -65,7 +65,7 @@ class TarotCard {
     return value;
   }
   
-  /// Path to the card image asset
+  
   String get imagePath {
     if (type == CardType.excuse) {
       return 'image/cartes-tarot/CaJ-TaroTv1-Exc.png';
@@ -73,7 +73,7 @@ class TarotCard {
     return 'image/cartes-tarot/CaJ-TaroTv1-${value}AT.png';
   }
   
-  /// Path to the card back image
+  
   static String get backImagePath => 'image/cartes-tarot/CaJ-TaroTv1-Dos.png';
   
   @override
@@ -85,46 +85,46 @@ class TarotCard {
   int get hashCode => value.hashCode ^ type.hashCode;
 }
 
-// =============================================================================
-// GAME CONTROLLER
-// =============================================================================
 
-/// Main game controller using GetX for state management
+
+
+
+
 class GameController extends GetxController {
-  // --- Game Configuration ---
+  
   var playerCount = 4.obs;
   
-  // --- Scoring ---
-  // Lives: Starts at 14 (King = 14, Queen = 13, ..., Ace = 1)
+  
+  
   var scores = <int>[14, 14, 14, 14].obs;
   var scoreCardNames = <String>['Roi', 'Dame', 'Cavalier', 'Valet', '10', '9', '8', '7', '6', '5', '4', '3', '2', 'As'].obs;
   
-  // --- Round/Manche State ---
-  var currentCardsCount = 5.obs; // 5 -> 4 -> 3 -> 2 -> 1 per manche
+  
+  var currentCardsCount = 5.obs; 
   var mancheNumber = 1.obs;
-  var roundInManche = 1.obs; // 1-5 within current manche
+  var roundInManche = 1.obs; 
   var dealerIndex = 0.obs;
   var currentPlayerIndex = 0.obs;
   
-  // --- Player Hands and Table ---
+  
   var playerHands = <List<TarotCard>>[[], [], [], []].obs;
   var currentBids = <int?>[null, null, null, null].obs;
   var tricksWon = <int>[0, 0, 0, 0].obs;
-  var tableCards = <int, TarotCard>{}.obs; // PlayerIndex : Card played
-  var trickLeader = 0.obs; // Who led the current trick
+  var tableCards = <int, TarotCard>{}.obs; 
+  var trickLeader = 0.obs; 
   
-  // --- Game Phase ---
+  
   var isBiddingPhase = true.obs;
   var isGameOver = false.obs;
   var statusMessage = "Bienvenue au Tarot Africain!".obs;
   
-  // --- The Deck (21 trumps + 1 excuse) ---
+  
   final List<TarotCard> deck = [
     ...List.generate(21, (i) => TarotCard(i + 1, CardType.trump)),
     TarotCard(0, CardType.excuse),
   ];
   
-  /// Initialize a new game with the specified number of players
+  
   void setupGame(int players) {
     playerCount.value = players;
     scores.value = List.generate(players, (_) => 14);
@@ -134,20 +134,20 @@ class GameController extends GetxController {
     dealerIndex.value = 0;
     isGameOver.value = false;
     
-    // Initialize player hands
+    
     playerHands.value = List.generate(players, (_) => <TarotCard>[]);
     
     startRound();
   }
   
-  /// Start a new round
+  
   void startRound() {
-    // Reset round state
+    
     tableCards.clear();
     tricksWon.value = List.generate(playerCount.value, (_) => 0);
     currentBids.value = List.generate(playerCount.value, (_) => null);
     
-    // Shuffle and deal cards
+    
     final shuffledDeck = List<TarotCard>.from(deck)..shuffle(Random());
     for (int i = 0; i < playerCount.value; i++) {
       playerHands[i] = shuffledDeck.sublist(
@@ -157,21 +157,21 @@ class GameController extends GetxController {
     }
     playerHands.refresh();
     
-    // Set bidding phase
+    
     isBiddingPhase.value = true;
-    // First bidder is to the left of the dealer
+    
     currentPlayerIndex.value = (dealerIndex.value + 1) % playerCount.value;
     trickLeader.value = currentPlayerIndex.value;
     
     _updateStatus();
     
-    // If AI starts bidding
+    
     if (currentPlayerIndex.value != 0) {
       _scheduleAIAction();
     }
   }
   
-  /// Update status message based on current game state
+  
   void _updateStatus() {
     String playerName = currentPlayerIndex.value == 0 
         ? "Vous" 
@@ -192,23 +192,23 @@ class GameController extends GetxController {
     }
   }
   
-  // ===========================================================================
-  // BIDDING LOGIC
-  // ===========================================================================
   
-  /// Submit a bid for the current player
+  
+  
+  
+  
   void submitBid(int bid) {
     currentBids[currentPlayerIndex.value] = bid;
     currentBids.refresh();
     _nextTurn();
   }
   
-  /// Get valid bid options for the current player
-  /// The sum of all bids cannot equal the number of cards
+  
+  
   List<int> getValidBids() {
     List<int> possible = List.generate(currentCardsCount.value + 1, (i) => i);
     
-    // Only the last bidder (dealer) has the sum constraint
+    
     if (currentPlayerIndex.value == dealerIndex.value) {
       int sum = currentBids.where((b) => b != null).fold(0, (a, b) => a + b!);
       int forbidden = currentCardsCount.value - sum;
@@ -219,11 +219,11 @@ class GameController extends GetxController {
     return possible;
   }
   
-  // ===========================================================================
-  // TRICK PLAYING LOGIC
-  // ===========================================================================
   
-  /// Play a card from the current player's hand
+  
+  
+  
+  
   void playCard(TarotCard card) {
     if (isBiddingPhase.value) return;
     if (currentPlayerIndex.value != 0 && currentPlayerIndex.value != currentPlayerIndex.value) return;
@@ -234,7 +234,7 @@ class GameController extends GetxController {
     playerHands.refresh();
     tableCards.refresh();
     
-    // Check if all players have played
+    
     if (tableCards.length == playerCount.value) {
       _resolveTrick();
     } else {
@@ -242,30 +242,30 @@ class GameController extends GetxController {
     }
   }
   
-  /// Move to the next player's turn
+  
   void _nextTurn() {
     currentPlayerIndex.value = (currentPlayerIndex.value + 1) % playerCount.value;
     
-    // Check if bidding phase is complete (dealer has bid)
+    
     if (isBiddingPhase.value && currentBids[dealerIndex.value] != null) {
       isBiddingPhase.value = false;
-      // First to play is left of dealer
+      
       currentPlayerIndex.value = (dealerIndex.value + 1) % playerCount.value;
       trickLeader.value = currentPlayerIndex.value;
     }
     
     _updateStatus();
     
-    // Schedule AI action if not human player
+    
     if (currentPlayerIndex.value != 0) {
       _scheduleAIAction();
     }
   }
   
-  /// Resolve the current trick and determine winner
+  
   void _resolveTrick() {
-    // Find the highest card (Excuse = 0 normally, but can be 22)
-    // For simplicity, we treat Excuse as lowest unless played alone
+    
+    
     int winnerIndex = trickLeader.value;
     int highestValue = -1;
     
@@ -280,13 +280,13 @@ class GameController extends GetxController {
     tricksWon[winnerIndex]++;
     tricksWon.refresh();
     
-    // Brief delay to show who won before clearing
+    
     Future.delayed(const Duration(milliseconds: 800), () {
       tableCards.clear();
       currentPlayerIndex.value = winnerIndex;
       trickLeader.value = winnerIndex;
       
-      // Check if round is over
+      
       if (playerHands[0].isEmpty) {
         _endRound();
       } else {
@@ -298,9 +298,9 @@ class GameController extends GetxController {
     });
   }
   
-  /// End the current round and calculate scores
+  
   void _endRound() {
-    // Calculate score changes
+    
     List<String> results = [];
     for (int i = 0; i < playerCount.value; i++) {
       int bid = currentBids[i] ?? 0;
@@ -315,7 +315,7 @@ class GameController extends GetxController {
     }
     scores.refresh();
     
-    // Check for game over
+    
     if (scores.any((s) => s <= 0)) {
       isGameOver.value = true;
       int winner = scores.indexWhere((s) => s == scores.reduce(max));
@@ -343,20 +343,20 @@ class GameController extends GetxController {
       return;
     }
     
-    // Progress to next round
+    
     if (currentCardsCount.value > 1) {
-      // Continue manche: reduce card count
+      
       currentCardsCount.value--;
       roundInManche.value++;
     } else {
-      // End of manche: change dealer, reset to 5 cards
+      
       currentCardsCount.value = 5;
       roundInManche.value = 1;
       mancheNumber.value++;
       dealerIndex.value = (dealerIndex.value + 1) % playerCount.value;
     }
     
-    // Show round results
+    
     String message = results.isEmpty 
         ? "Tout le monde a rempli son contrat!" 
         : results.join(' | ');
@@ -369,13 +369,13 @@ class GameController extends GetxController {
       duration: const Duration(seconds: 2),
     );
     
-    // Start next round after delay
+    
     Future.delayed(const Duration(seconds: 2), startRound);
   }
   
-  // ===========================================================================
-  // AI LOGIC
-  // ===========================================================================
+  
+  
+  
   
   void _scheduleAIAction() {
     Future.delayed(const Duration(milliseconds: 800), () {
@@ -387,18 +387,18 @@ class GameController extends GetxController {
     });
   }
   
-  /// AI bidding strategy
+  
   void _aiBid() {
     var validBids = getValidBids();
     var hand = playerHands[currentPlayerIndex.value];
     
-    // Simple strategy: count high cards (value >= 15) and bid accordingly
+    
     int highCards = hand.where((c) => c.getEffectiveValue() >= 15).length;
     
-    // Find closest valid bid to high card count
+    
     int targetBid = highCards.clamp(0, currentCardsCount.value);
     
-    // If target bid is not valid, pick randomly from valid options
+    
     if (!validBids.contains(targetBid)) {
       targetBid = validBids[Random().nextInt(validBids.length)];
     }
@@ -406,44 +406,44 @@ class GameController extends GetxController {
     submitBid(targetBid);
   }
   
-  /// AI playing strategy
+  
   void _aiPlay() {
     var hand = playerHands[currentPlayerIndex.value];
     if (hand.isEmpty) return;
     
     TarotCard cardToPlay;
     
-    // Simple strategy
+    
     if (tableCards.isEmpty) {
-      // Leading: play medium card
+      
       hand.sort((a, b) => a.getEffectiveValue().compareTo(b.getEffectiveValue()));
       cardToPlay = hand[hand.length ~/ 2];
     } else {
-      // Following: try to win if we need tricks, else dump low card
+      
       int needed = (currentBids[currentPlayerIndex.value] ?? 0) - tricksWon[currentPlayerIndex.value];
       int highestOnTable = tableCards.values
           .map((c) => c.getEffectiveValue())
           .reduce(max);
       
       if (needed > 0) {
-        // Try to win - play lowest card that beats current highest
+        
         var winners = hand.where((c) => c.getEffectiveValue() > highestOnTable).toList();
         if (winners.isNotEmpty) {
           winners.sort((a, b) => a.getEffectiveValue().compareTo(b.getEffectiveValue()));
           cardToPlay = winners.first;
         } else {
-          // Can't win, dump lowest
+          
           hand.sort((a, b) => a.getEffectiveValue().compareTo(b.getEffectiveValue()));
           cardToPlay = hand.first;
         }
       } else {
-        // Don't need more tricks, try to lose
+        
         var losers = hand.where((c) => c.getEffectiveValue() < highestOnTable).toList();
         if (losers.isNotEmpty) {
           losers.sort((a, b) => b.getEffectiveValue().compareTo(a.getEffectiveValue()));
           cardToPlay = losers.first;
         } else {
-          // Must win, play highest
+          
           hand.sort((a, b) => b.getEffectiveValue().compareTo(a.getEffectiveValue()));
           cardToPlay = hand.first;
         }
@@ -454,11 +454,11 @@ class GameController extends GetxController {
   }
 }
 
-// =============================================================================
-// UI COMPONENTS
-// =============================================================================
 
-/// Main menu screen
+
+
+
+
 class MainMenu extends StatelessWidget {
   const MainMenu({super.key});
   
@@ -478,7 +478,7 @@ class MainMenu extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Title
+                
                 const Text(
                   "🃏 Tarot Africain 🃏",
                   style: TextStyle(
@@ -501,7 +501,7 @@ class MainMenu extends StatelessWidget {
                 ),
                 const SizedBox(height: 60),
                 
-                // Card preview
+                
                 SizedBox(
                   height: 150,
                   child: Stack(
@@ -524,7 +524,7 @@ class MainMenu extends StatelessWidget {
                 ),
                 const SizedBox(height: 60),
                 
-                // Play buttons
+                
                 ElevatedButton.icon(
                   onPressed: () => _startGame(3),
                   icon: const Icon(Icons.people),
@@ -545,7 +545,7 @@ class MainMenu extends StatelessWidget {
                 
                 const SizedBox(height: 40),
                 
-                // Rules hint
+                
                 Container(
                   padding: const EdgeInsets.all(16),
                   margin: const EdgeInsets.symmetric(horizontal: 32),
@@ -606,7 +606,7 @@ class MainMenu extends StatelessWidget {
   }
 }
 
-/// Main game board screen
+
 class GameBoard extends StatelessWidget {
   const GameBoard({super.key});
   
@@ -621,7 +621,7 @@ class GameBoard extends StatelessWidget {
           style: const TextStyle(fontSize: 14),
         )),
         actions: [
-          // Score button
+          
           Obx(() => TextButton.icon(
             onPressed: () => _showScoreBoard(c),
             icon: const Icon(Icons.emoji_events, color: Colors.amber),
@@ -642,19 +642,19 @@ class GameBoard extends StatelessWidget {
         ),
         child: Column(
           children: [
-            // Opponents area
+            
             Expanded(
               flex: 2,
               child: Obx(() => _buildOpponentsArea(c)),
             ),
             
-            // Table area (center)
+            
             Expanded(
               flex: 3,
               child: _buildTableArea(c),
             ),
             
-            // Player area
+            
             Obx(() => _buildPlayerArea(c)),
           ],
         ),
@@ -662,7 +662,7 @@ class GameBoard extends StatelessWidget {
     );
   }
   
-  /// Show score board dialog
+  
   void _showScoreBoard(GameController c) {
     Get.dialog(
       AlertDialog(
@@ -703,7 +703,7 @@ class GameBoard extends StatelessWidget {
     );
   }
   
-  /// Build the opponents area at the top
+  
   Widget _buildOpponentsArea(GameController c) {
     return Padding(
       padding: const EdgeInsets.all(8),
@@ -727,24 +727,24 @@ class GameBoard extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Robot icon
+                
                 CircleAvatar(
                   backgroundColor: const Color(0xFF0f3460),
                   child: Text("R$playerIdx", 
                       style: const TextStyle(color: Colors.white, fontSize: 12)),
                 ),
                 const SizedBox(height: 4),
-                // Lives
+                
                 Text("❤️ ${c.scores[playerIdx]}", 
                     style: const TextStyle(color: Colors.red, fontSize: 12)),
-                // Bid
+                
                 if (c.currentBids[playerIdx] != null)
                   Text("🎯 ${c.currentBids[playerIdx]}", 
                       style: const TextStyle(color: Colors.amber, fontSize: 12)),
-                // Tricks won
+                
                 Text("🏆 ${c.tricksWon[playerIdx]}", 
                     style: const TextStyle(color: Colors.green, fontSize: 12)),
-                // Cards remaining
+                
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: List.generate(
@@ -768,12 +768,12 @@ class GameBoard extends StatelessWidget {
     );
   }
   
-  /// Build the central table area
+  
   Widget _buildTableArea(GameController c) {
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1a5f3c), // Green felt
+        color: const Color(0xFF1a5f3c), 
         borderRadius: BorderRadius.circular(100),
         border: Border.all(color: const Color(0xFF8b4513), width: 8),
         boxShadow: [
@@ -821,7 +821,7 @@ class GameBoard extends StatelessWidget {
     );
   }
   
-  /// Build the player's area at the bottom
+  
   Widget _buildPlayerArea(GameController c) {
     bool isPlayerTurn = c.currentPlayerIndex.value == 0;
     bool isHiddenRound = c.currentCardsCount.value == 1 && c.isBiddingPhase.value;
@@ -835,7 +835,7 @@ class GameBoard extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Status message
+          
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
@@ -853,7 +853,7 @@ class GameBoard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           
-          // Player info row
+          
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -870,7 +870,7 @@ class GameBoard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           
-          // Bidding buttons
+          
           if (c.isBiddingPhase.value && isPlayerTurn)
             Wrap(
               spacing: 8,
@@ -888,7 +888,7 @@ class GameBoard extends StatelessWidget {
           
           const SizedBox(height: 12),
           
-          // Player's hand
+          
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -919,7 +919,7 @@ class GameBoard extends StatelessWidget {
   }
 }
 
-/// Reusable card widget
+
 class TarotCardWidget extends StatelessWidget {
   final TarotCard card;
   final bool isHidden;
@@ -960,7 +960,7 @@ class TarotCardWidget extends StatelessWidget {
           isHidden ? TarotCard.backImagePath : card.imagePath,
           fit: BoxFit.cover,
           errorBuilder: (_, __, ___) {
-            // Fallback if image not found
+            
             return Container(
               color: isHidden ? const Color(0xFF3a3a5c) : Colors.white,
               child: Center(
